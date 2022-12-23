@@ -3,20 +3,20 @@ import numpy as np
 error = 1.5e-3 #corresponding to 0.043 eV
 b_r = 8 #number of qubits used in the uniform superposition preparations, 8 is enough (very high probability of success)
 pnuth = 0.75 #success threshold for amplitude amplification in loc and V
-orderofmag = 3 #N = 10**orderofmag
+orderofmag = 4 #N = 10**orderofmag
 material_name = ['dis','limnfo','limnnio','limno']
-material_choice = material_name[2]
+material_choice = material_name[3]
 
 
-baseparams = {'dis': {3: (1e3,2362), 4: (1e4,3807), 5: (1e5,4526)},
-'limnfo': {3: (1e3,10889), 4: (1e4,13622), 5: (1e5,16242)},
-'limnnio': {3: (1e3,12151), 4: (1e4,15200), 5: (1e5,18139)},
-'limno': {3: (1e3,10230), 4: (1e4,12798), 5: (1e5,15251)}
+baseparams = {'dis': {3: (1e3,2366), 4: (1e4,2867), 5: (1e5,3365)},
+'limnfo': {3: (1e3,10906), 4: (1e4,13525), 5: (1e5,16147)},
+'limnnio': {3: (1e3,12171), 4: (1e4,15105), 5: (1e5,18045)},
+'limno': {3: (1e3,10248), 4: (1e4,12702), 5: (1e5,15156)}
 }
 N = baseparams[material_choice][orderofmag][0]
 n_dirty = baseparams[material_choice][orderofmag][1]
 kappa = 1 #we simply use a universal parallelization factor, instead of optimizing for each of qroms used in loc,V,NL
-n_parallel = 150 #this is n_parallel, which means we assume the quantum computer is capabale of applying n_parallel many Toffolis simultaneously
+n_parallel = 500 #this is n_parallel, which means we assume the quantum computer is capabale of applying n_parallel many Toffolis simultaneously
 
 dilithium_iron_silicate = { #Li2FeSiO4
 'eta' : 100,
@@ -122,7 +122,7 @@ dict_errors_opt = {'error_qpe': error/np.sqrt(1+qpe_error_opt**2),  'error_op': 
 # opt_error = True
 dict_errors_choice = dict_errors_opt if opt_error else dict_errors_nopt
 
-
+# print(n_errors_opt) = 7
 
 Configs = { **material_specs[material_choice],
 'N': N,

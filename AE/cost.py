@@ -30,28 +30,28 @@ def first_quantization_qubitization(N : float, material= 'dis', pth = 0.95, n_pa
         'eta' : 156,
         'lambda_zeta': 156,
         'material_ortho_lattice': True,
-        'n_p2cost' : {4: 2362, 5: 3807, 6: 4526, 9: 4902}
+        'n_p2cost' : {4: 2366, 5: 2867, 6: 3365, 9: 4859}
         }
     
     if material == 'limnfo':
         mspecs = {'vec_a': np.array([[12.48,0,0],[0,8.32,0],[0,0,8.32]]),
         'eta' : 863,
         'lambda_zeta': 863,
-        'n_p2cost' : {4: 10889, 5: 13622, 6: 16242, 10: 26720},
+        'n_p2cost' : {4: 10906, 5: 13525, 6: 16147, 10: 26629},
         'material_ortho_lattice': True
         }
     if material == 'limnnio':
         mspecs = {'vec_a': np.array([[5.7081,0,0],[-4.2811,7.4151,0],[0,0,19.6317]]),
         'eta' : 968,
         'lambda_zeta': 968,
-        'n_p2cost' : {4: 12151, 5: 15200, 6: 18139, 10: 29874},
+        'n_p2cost' : {4: 12171, 5: 15105, 6: 18045, 10: 29784},
         'material_ortho_lattice': False
         }
     if material == 'limno':
         mspecs = {'vec_a': np.array([[10.02,0,0],[0,17.32,0],[-1.6949, 0., 4.7995]]),
         'eta' : 808,
         'lambda_zeta': 808,
-        'n_p2cost' : {4: 10230, 5: 12798, 6: 15251, 10: 25065},
+        'n_p2cost' : {4: 10248, 5: 12702, 6: 15156, 10: 24974},
         'material_ortho_lattice': False
         }
     

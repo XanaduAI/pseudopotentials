@@ -26,15 +26,15 @@ class gate_cost_PREP_PP:
         
     def momentum_state_loc_qrom(self):
         n_qrom_bits = 3*self.n_p+self.n_Ltype
-        x = 2**(n_qrom_bits + 1)
+        x = 2**(n_qrom_bits + 1)-1
         y = self.n_Mloc * (n_qrom_bits-1) + (self.n_Mloc+1)  #the very last one has to output sign k_i(G_nu)
         
         beta_loc_dirty = np.floor(self.n_dirty/(self.n_Mloc+1))
         
         if self.n_parallel == 1: 
-            beta_loc_gate = np.floor(np.sqrt(2*x/(3*(self.n_Mloc+1))))
+            beta_loc_gate = np.floor(np.sqrt(2*x/(3*(self.n_Mloc+1)*(3*self.n_p))))
         else:
-            beta_loc_gate = np.floor(2*x/(3*(self.n_Mloc+1)/self.kappa) * np.log(2))
+            beta_loc_gate = np.floor(2*x/(3*(self.n_Mloc+1)*(3*self.n_p)/self.kappa) * np.log(2))
             
         beta_loc_parallel = np.floor(self.n_parallel/self.kappa)
         
@@ -54,7 +54,7 @@ class gate_cost_PREP_PP:
                 3*np.ceil(np.log2(self.beta_loc)) * np.ceil((self.n_Mloc+1)/self.kappa) + 6*self.n_p
         
         self.momentum_state_loc_cost = 2*(self.momentum_state_qrom_loc_cost) + (self.n_Mloc-3)*n_qrom_bits
-        return self.momentum_state_loc_cost 
+        return self.momentum_state_loc_cost #this will get multiplied by two since self.AA_loc = 2
     
     def prep_sel_qubits(self):
         self.prep_sel_qubits_cost = 2*(2* 2**(2+1)+2*(self.n_op-3)*2)
@@ -92,20 +92,34 @@ class gate_cost_PREP_PP:
         return self.prep_op_registers_cost
 
     def binary_decomp_indices(self):
-        o_idx = 13 
-        n_qrom_bits = np.ceil(np.log2(o_idx))+self.n_Ltype  
+        
+        n_qrom_bits = 4+self.n_Ltype  
         x = 2**(n_qrom_bits+1)-1 
         y = self.n_k * n_qrom_bits
+        
         beta_k_dirty = np.floor(self.n_dirty/y)
+        if self.n_parallel == 1:
+            beta_k_gate = np.floor(np.sqrt(2*x/(3*y)))
+        else:
+            beta_k_gate = np.floor(2*x/(3*y/self.kappa) * np.log(2))
         beta_k_parallel = np.floor(self.n_parallel/self.kappa)
-        beta_k_gate = np.floor(2*x/(3*y/self.kappa) * np.log(2))
-        self.beta_k = np.min([beta_k_dirty, beta_k_gate, beta_k_parallel])
+        
+        if self.n_parallel == 1:
+            self.beta_k = np.min([beta_k_dirty, beta_k_gate])
+        else:
+            self.beta_k = np.min([beta_k_dirty, beta_k_gate, beta_k_parallel])
         if self.beta_k == 0: 
             self.beta_k=1
             print('lambda = 1')
-        qrom_cost = 2*(2*np.ceil(x/self.beta_k) + 3*np.ceil(self.n_k/self.kappa)*\
-                np.ceil(np.log2(self.beta_k))*n_qrom_bits + 2*n_qrom_bits)+\
-                (self.n_k-3)*n_qrom_bits
+        
+        if self.n_parallel == 1:
+            qrom_cost =  2*(2*np.ceil(x/self.beta_k) + 3*self.n_k*\
+                    self.beta_k*n_qrom_bits + 2*n_qrom_bits)+\
+                    (self.n_k-3)*n_qrom_bits
+        else:
+            qrom_cost = 2*(2*np.ceil(x/self.beta_k) + 3*np.ceil(self.n_k/self.kappa)*\
+                    np.ceil(np.log2(self.beta_k))*n_qrom_bits + 2*n_qrom_bits)+\
+                    (self.n_k-3)*n_qrom_bits
         self.binary_QROM_decomp_indices_cost = 2*qrom_cost + 2*2**(self.n_Ltype+2) + 12 
         
         return self.binary_QROM_decomp_indices_cost
@@ -117,7 +131,7 @@ class gate_cost_PREP_PP:
     def momentum_state_V(self):
         nqrom_bits = 3*self.n_p
         x = 2**nqrom_bits
-        y = self.n_M_V+1 #one bit more due to binary decimal needed to compare to integer m
+        y = self.n_M_V 
         beta_V_dirty = np.floor(self.n_dirty/y)
         beta_V_parallel = np.floor(self.n_parallel/self.kappa)
         
@@ -171,12 +185,13 @@ class gate_cost_PREP_PP:
         self.prep_T_QROM = 2 * 2 * (np.ceil(x/beta_T_qrom)+ beta_T_qrom*y + nqrom_bits * (self.n_b-3))
         return self.prep_T_QROM
     
-    def cost(self):
+    def cost(self): 
         self.cost = self.prep_nondiagonal_V() + self.binary_decomp_indices() + self.prep_T_QROM() + \
-            self.prep_uniform_nuclei_type_loc() + self.prep_uniform_nuclei_a_locV() + \
+            self.prep_uniform_nuclei_a_locV() + \
             self.prep_R_nuclei_coords() + self.binary_decomp_register_fgh() + \
             self.prep_op_registers() + self.AA_V*self.momentum_state_V() + \
             self.AA_loc*self.momentum_state_loc()
+            # self.prep_uniform_nuclei_type_loc() + self.prep_uniform_nuclei_a_locV() + \
         return self.cost
 
     #Pablo
@@ -203,8 +218,7 @@ class gate_cost_SEL_PP:
         return self.cswap_cost
     
     def selcosts_binary_QROM_decomp_cost(self):
-        self.selcosts_binary_QROM_decomp_cost = 5*(self.n_p - 1) + 2 + \
-            2*self.selcosts_QROM() 
+        self.selcosts_binary_QROM_decomp_cost = 5*(self.n_p - 1) + 2 
         return self.selcosts_binary_QROM_decomp_cost
 
     def selcosts_QROM(self):
@@ -245,10 +259,10 @@ class gate_cost_SEL_PP:
         if self.material_ortho_lattice:
             if self.n_parallel == 1:
                 self.selcosts_QROM_cost = 2*(2* np.ceil(x/self.beta_NL) + \
-                        3* self.beta_NL * \
-                            self.n_NL*self.n_p + \
-                        2*self.n_p)+(self.n_NL-3)*y/self.n_NL + (3*self.n_p-1)
+                        3* self.beta_NL *y + \
+                        2*self.n_p)+(self.n_NL-3)*y/self.n_NL 
                 self.selcosts_QROM_cost *= 3
+                self.selcosts_QROM_cost += (3*self.n_p-1)
             else:
                 self.selcosts_QROM_cost = 2*(2* np.ceil(x/self.beta_NL) + \
                         3* np.ceil(np.log2(self.beta_NL)) * \
@@ -257,9 +271,8 @@ class gate_cost_SEL_PP:
         else:
             if self.n_parallel == 1:
                 self.selcosts_QROM_cost = 2*(2* np.ceil(x/self.beta_NL) + \
-                        3* self.beta_NL * \
-                            self.n_NL*2*self.n_p + \
-                        2*2*self.n_p)+(self.n_NL-3)*y/self.n_NL + (3*self.n_p-1)
+                        3* self.beta_NL * y + \
+                        2*2*self.n_p)+(self.n_NL-3)*y/self.n_NL 
                 
                 n_qrom_bits_n_p = self.n_p + ortho_additional
                 x_n_p = 2**(n_qrom_bits_n_p +1)-2**(ortho_additional)
@@ -268,7 +281,8 @@ class gate_cost_SEL_PP:
                 self.selcosts_QROM_cost += 2*(2* np.ceil(x_n_p/self.beta_NL) + \
                         3* self.beta_NL * \
                             self.n_NL*self.n_p + \
-                        2*self.n_p)+(self.n_NL-3)*y_n_p/self.n_NL + (3*self.n_p-1)
+                        2*self.n_p)+(self.n_NL-3)*y_n_p/self.n_NL 
+                self.selcosts_QROM_cost +=  (3*self.n_p-1)
             else:     
                 self.selcosts_QROM_cost = 2*(2* np.ceil(x/self.beta_NL) + \
                         3* np.ceil(np.log2(self.beta_NL)) * \
@@ -313,7 +327,10 @@ class gate_cost_SEL_PP:
             self.beta_NL_prime = np.min([beta_NL_prime_dirty,
                 beta_NL_prime_gate])
 
-        self.selcosts_QROM_i_cost = 2*(2**(3+1)-1) + 3*(self.n_NL_prime-3)
+        if self.material_ortho_lattice:
+            self.selcosts_QROM_i_cost = 2*(2**(3+1)-1) + 3*(self.n_NL_prime-3)
+        else:
+            self.selcosts_QROM_i_cost = 2*(2**(2+1)-1) + 3*(self.n_NL_prime-3)
         print('NUMBER OF DIRTIES REQUIRED FOR SEL_NL', self.n_dirty)
 
         if self.material_ortho_lattice:
@@ -350,10 +367,10 @@ class gate_cost_SEL_PP:
                         2*2*self.n_p)+(self.n_NL-3)*y/self.n_NL
 
         if self.material_ortho_lattice:
-            self.selcosts_QROM_20_cost = 5*(self.selcosts_QROM_i_cost + \
+            self.selcosts_QROM_20_cost = 5*2*(self.selcosts_QROM_i_cost + \
                 self.selcosts_QROM_o_cost + 35) #35 is default of n_AA
         else:
-            self.selcosts_QROM_20_cost = 3*(self.selcosts_QROM_i_cost + \
+            self.selcosts_QROM_20_cost = 3*2*(self.selcosts_QROM_i_cost + \
                 self.selcosts_QROM_o_cost + 2) #35 is default of n_AA
 
         self.selcosts_QROM_cost += self.selcosts_QROM_20_cost
@@ -368,7 +385,8 @@ class gate_cost_SEL_PP:
         return self.phasing_cost
 
     def cost(self):
-        self.cost = self.cswap() + self.selcosts_binary_QROM_decomp_cost() + self.caddsub_nu_pq() + self.phasing()
+        self.cost = self.cswap() + self.selcosts_binary_QROM_decomp_cost() +\
+            self.selcosts_QROM() + self.caddsub_nu_pq() + self.phasing()
         return self.cost
 
 class gate_cost_SlaterDet:

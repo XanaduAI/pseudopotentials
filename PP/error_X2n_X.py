@@ -178,10 +178,13 @@ class error_X2n_X_HGH(error_X2n_X):
             rs, Bi_inv = I['rs'], I['Bi_inv']
             atom_n_NL_error += rs[0]**3 * abs(Bi_inv[0]) * multipliers[0][atom]
             atom_n_NL_error += 32/3 * rs[1]**5 * abs(Bi_inv[1]) * sum(multipliers[1][atom])
-            atom_n_NL_error += 3 * 64/45 * rs[2]**7 * abs(Bi_inv[2]) * multipliers[2][atom]
+            # atom_n_NL_error += 3 * 64/45 * rs[2]**7 * abs(Bi_inv[2]) * multipliers[2][atom]
+            atom_n_NL_error += 64/45 * rs[2]**7 * abs(Bi_inv[2]) * multipliers[2][atom]
             atom_n_NL_error += 64/15 * rs[2]**7 * abs(Bi_inv[2]) * sum(multipliers[3][atom])
             atom_n_NL_error *= self.atoms_rep[idx]
         scalar = 18 * (self.n_p + 4 + self.n_Ltype) * np.pi**2 * self.eta *  atom_n_NL_error / (self.Omega * error_NL) 
+        if not self.material_ortho_lattice:
+            scalar = scalar * (2*self.n_p + 4 + self.n_Ltype)/(self.n_p + 4 + self.n_Ltype)
         return self.error2n(scalar)
 
     def compute_n_k(self, error_k, lambda_NL_prime):

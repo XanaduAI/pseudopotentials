@@ -53,8 +53,10 @@ class lambda_X:
         for b_omega in self.recip_bv:
             for b_omega_prime in self.recip_bv:
                 self.abs_sum += np.abs(np.sum(b_omega*b_omega_prime))
+        # self.lambda_T = self.eta/2 * self.abs_sum * \
+        #         2**(2*self.n_p-2)/(1-(4*np.pi/2**(self.error_X.compute_n_b(self.error_b)))**2)
         self.lambda_T = self.eta/2 * self.abs_sum * \
-                2**(2*self.n_p-2)/(1-(4*np.pi/2**(self.error_X.compute_n_b(self.error_b)))**2)
+                2**(2*self.n_p-2)
         if self.material_ortho_lattice:
             self.lambda_T /= 2    
         return self.lambda_T
@@ -211,8 +213,9 @@ class lambda_X_HGH(lambda_X):
         scalar = 4*np.pi*self.eta/self.Omega 
         self.n_Mloc = self.error_X.error2n(scalar * self.integral_loc_error * 2*np.pi*maxnaPa*(3*self.n_p+self.n_Ltype)/self.error_Mloc)
         
-        self.lambda_loc = scalar * self.integral_loc / (1-(4*np.pi/(2**self.n_Mloc))**2) #this one is right and triple checked
+        # self.lambda_loc = scalar * self.integral_loc / (1-(4*np.pi/(2**self.n_Mloc))**2) #this one is right and triple checked
         #* (1 + 2**(-self.n_Mloc)*np.pi*(3*self.n_p+self.n_Ltype))
+        self.lambda_loc = scalar * self.integral_loc #this one is right and triple checked
 
 
     def compute_lambda_NL(self): #HGH specific implementation
@@ -235,27 +238,33 @@ class lambda_X_HGH(lambda_X):
             rs, Bi_inv = I['rs'], I['Bi_inv']
             
             multipliers[0][atom] = (self.error_X.G_pnormsexps**(rs[0]**2)).sum()
+            # NL0[idx] = self.atoms_rep[idx] * rs[0]**3 * abs(Bi_inv[0]) * \
+            #     multipliers[0][atom]/Ps(self.atoms_rep[idx],self.b_r)
             NL0[idx] = self.atoms_rep[idx] * rs[0]**3 * abs(Bi_inv[0]) * \
-                multipliers[0][atom]/Ps(self.atoms_rep[idx],self.b_r)
-            
+                multipliers[0][atom]
             multipliers[1][atom] = []
             for i in range(3):
                 multipliers[1][atom].append((self.error_X.G_psomegasquared[i] *\
                     self.error_X.G_pnormsexps**(rs[1]**2)).sum())
+                # NL1omega[idx][i] = self.atoms_rep[idx] * rs[1]**5 * abs(Bi_inv[1]) * \
+                #     multipliers[1][atom][-1]/Ps(self.atoms_rep[idx],self.b_r)
                 NL1omega[idx][i] = self.atoms_rep[idx] * rs[1]**5 * abs(Bi_inv[1]) * \
-                    multipliers[1][atom][-1]/Ps(self.atoms_rep[idx],self.b_r)
-
+                    multipliers[1][atom][-1]
             multipliers[2][atom] = (self.error_X.G_pnormsquad * \
                 self.error_X.G_pnormsexps**(rs[2]**2)).sum()
+            # NL20[idx] =  self.atoms_rep[idx] * rs[2]**7 * abs(Bi_inv[2]) * \
+            #     multipliers[2][atom]/Ps(self.atoms_rep[idx],self.b_r)
             NL20[idx] =  self.atoms_rep[idx] * rs[2]**7 * abs(Bi_inv[2]) * \
-                multipliers[2][atom]/Ps(self.atoms_rep[idx],self.b_r)
+                multipliers[2][atom]
             
             multipliers[3][atom] = []
             for i in range(6):
                 multipliers[3][atom].append((self.error_X.G_psomegaomegasquared[i] * \
                     self.error_X.G_pnormsexps**(rs[2]**2)).sum())
+                # NL2omegaomega[idx][i] = (int(i>2)+1) * self.atoms_rep[idx] * rs[2]**7 * \
+                #     abs(Bi_inv[2]) * multipliers[3][atom][-1]/Ps(self.atoms_rep[idx],self.b_r)
                 NL2omegaomega[idx][i] = (int(i>2)+1) * self.atoms_rep[idx] * rs[2]**7 * \
-                    abs(Bi_inv[2]) * multipliers[3][atom][-1]/Ps(self.atoms_rep[idx],self.b_r)
+                    abs(Bi_inv[2]) * multipliers[3][atom][-1]
 
         self.multipliers = multipliers
         NL0 = NL0 * 8*np.pi*self.eta/self.Omega
@@ -269,8 +278,9 @@ class lambda_X_HGH(lambda_X):
         NL2omegaomegasum = list(NL2omegaomega.sum(axis=0))
         self.lambda_NL_prime = [NL0sum] + NL1omegasum + [NL20sum] + NL2omegaomegasum
         self.n_k = self.error_X.compute_n_k(self.error_k, np.array(self.lambda_NL_prime))    
-        self.lambda_NL = [x/(1-((4+self.n_Ltype)*np.pi/2**(self.n_k))**2)\
-            for x in self.lambda_NL_prime]
+        # self.lambda_NL = [x/(1-((4+self.n_Ltype)*np.pi/2**(self.n_k))**2)\
+        #     for x in self.lambda_NL_prime]
+        self.lambda_NL = [x for x in self.lambda_NL_prime]
         self.compute_n_NL() #this is to be used later on
 
     def compute_n_NL(self):

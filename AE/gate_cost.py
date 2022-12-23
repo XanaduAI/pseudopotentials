@@ -77,6 +77,7 @@ weight_toffoli_cost, epsilon_S, n_B, a_U, n_p2cost, n_parallel,material):
             beta = np.min([beta_dirty, beta_gate])
         else:
             beta = np.min([beta_dirty, beta_gate, beta_parallel])
+            print('beta is determined by ',{0:'dirty',1:'gate',2:'parallel'}[np.argmin([beta_dirty, beta_gate, beta_parallel])])
         print('beta is ',beta, beta_dirty, beta_gate)
         if n_parallel == 1:
             momentum_state_cost_qrom = 2*np.ceil(x/beta) + 3*y*beta
