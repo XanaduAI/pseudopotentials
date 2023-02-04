@@ -6,31 +6,26 @@ norm = np.linalg.norm
 
 class error_X2n_X:
     def __init__(self, eta, atoms_and_rep_uc, direct_basis_vectors,
-     N,  Z_ions = None, PP_loc_params = None, PP_NL_params = None , **kwargs):
+     N,  PP_loc_params = None, PP_NL_params = None , **kwargs):
+        self.N = N
+        self.n_p = int(np.ceil(np.log2(N**(1/3) + 1)))
         self.eta = eta
         self.list_atoms, self.atoms_rep_uc = list(atoms_and_rep_uc.keys()), np.array(list(atoms_and_rep_uc.values()))
         
-        if Z_ions is not None:
-            self.Z_ions = np.array([Z_ions[k] for k in self.list_atoms])
-        else:
-            self.Z_ions = np.array([PP_loc_params[k]['Z_ion'] for k in self.list_atoms])
-
-        if PP_loc_params is not None:
-            self.PP_loc_params = PP_loc_params
-            self.PP_NL_params = PP_NL_params
+        self.Z_ions = np.array([PP_loc_params[k]['Z_ion'] for k in self.list_atoms])        
+        self.PP_loc_params = PP_loc_params
+        self.PP_NL_params = PP_NL_params
 
         self.direct_bv = np.array(direct_basis_vectors)
         
         self.angs2bohr = 1.8897259886
         self.maxai = max([norm(ai) for ai in self.direct_bv]) * self.angs2bohr
         def compute_Omega(vecs):
-            return np.abs(np.sum((np.cross(vecs[0],vecs[1])*vecs[2]))) * self.angs2bohr**3  # | (a cross b) . c |  volume of parallelepiped
+            return np.abs(np.sum((np.cross(vecs[0],vecs[1])*vecs[2]))) * self.angs2bohr**3  # | (a cross b) . c |  = volume of parallelepiped
 
         self.Omega = compute_Omega(self.direct_bv)
-        print(f'Omega in bohr {self.Omega} in angs {self.Omega/ self.angs2bohr**3}')
-
+        # print(f'Omega in bohr {self.Omega} in angs {self.Omega/ self.angs2bohr**3}')
         self.atoms_rep = self.atoms_rep_uc
-
         self.lambda_zeta = (self.Z_ions*self.atoms_rep).sum()
         self.natoms = self.atoms_rep.sum()
         self.angs2bohr = 1.8897259886
@@ -39,17 +34,12 @@ class error_X2n_X:
         recip_bv_u, recip_bv_s, recip_bv_v = np.linalg.svd(self.recip_bv)
         self.lambda_min_B , self.lambda_max_B = np.min(recip_bv_s), np.max(recip_bv_s) 
         self.bmin = self.lambda_min_B
-        self.bmin2 = np.min([norm(bi) for bi in self.recip_bv])
-        # assert abs(self.bmin2 - self.bmin) < 1e-6 #comment this out and you will see the assert goes thru --> The two nonorthogonal case studies have bmin = min ||b_i||
-
-        self.N = N
-        self.n_p = int(np.ceil(np.log2(N**(1/3) + 1)))
+        # self.bmin2 = np.min([norm(bi) for bi in self.recip_bv])
+        # assert abs(self.bmin2 - self.bmin) < 1e-6 #comment this out and you will see the assert goes thru --> The two nonorthogonal case studies have bmin = min ||b_i||    
         self.mcG = self.G_lattice(self.n_p)
-        self.G2idx = {k:v for v,k in enumerate(self.mcG)}
         self.G_ps = np.array([self.G_p(p) for p in self.mcG])
         self.G_pnorms = np.array([norm(G_p) for G_p in self.G_ps])
         self.G_pnormsexps = np.array([np.exp(-nGp**2) for nGp in self.G_pnorms])
-        self.G_nunormsexps = np.array([np.exp(nGp**2) if abs(nGp)>1e-7 else 1000 for nGp in self.G_pnorms])
         self.n_L = np.ceil(np.log2(self.natoms))
         self.natoms_type = len(self.list_atoms)
         self.n_Ltype = np.ceil(np.log2(self.natoms_type))
@@ -63,24 +53,17 @@ class error_X2n_X:
         integral = 1/error_X
         return self.error2n(scalar*integral)
 
-
     def compute_n_R(self, error_R):
         scalar = 2*self.eta*np.pi*self.maxai/(error_R*self.Omega)
         integral = self.sum_kloc_over_Gnu(self.n_p) + self.sum_kNL_over_Gnu(self.n_p)
         return self.error2n(scalar*integral)
-        
         
     def compute_n_M_V(self, error_M_V): #n_M_V
         scalar = 8*np.pi*self.eta*(self.eta-1)/(self.Omega**self.bmin**2)
         integral = (7*2**(self.n_p+1)-9*self.n_p+11-3*2**(-self.n_p))/error_M_V
         return self.error2n(scalar*integral)
     
-    def compute_n_Mloc(self, error_Mloc, scalar_factor_n_Mloc):
-        if 'k_locmin_val' not in self.__dict__.keys():
-            self.k_locminmax()
-        scalar = 4*np.pi*self.eta*scalar_factor_n_Mloc/(self.Omega) #FIX THIS
-        integral = 4*(7*2**(self.n_p+1)-9*self.n_p+11-3*2**(-self.n_p))/(error_Mloc * self.k_locmin_val**2 * self.bmin**2)
-        return self.error2n(scalar*integral)
+    
     
     def compute_n_b(self, error_b):
         self.abs_sum = 0 
@@ -102,10 +85,6 @@ class error_X2n_X:
     def sum_1_over_Gnu(self, n_p):
         return np.sum([1/normGp if abs(normGp)>1e-7 else 0 for normGp in self.G_pnorms])
 
-    #Pablo
-    # def sum_1_over_Gnu_fast(self, N):
-    #     return 2*np.pi*N**(2/3) 
-
     def f(self, x, y):
         return 1/(x**2 + y**2)
     def Intnquad(self, N0):
@@ -118,7 +97,6 @@ class error_X2n_X:
 
     def G_p(self, p):
         return np.sum(np.array(p)*self.recip_bv, axis=0)
-
 
     def sum_kloc_over_Gnu(self, n_p):
         mcG = self.mcG if n_p == self.n_p else self.G_lattice(n_p)
@@ -139,12 +117,11 @@ class error_X2n_X:
         integral = 0
         if fast:
             for idx, atom in enumerate(self.list_atoms):
-                I = self.PP_NL_params[atom]
-                #parallelize this here or try to find an estimate                
+                I = self.PP_NL_params[atom]        
                 integral += self.atoms_rep[idx]*np.abs(self.k_NL_fast(I))
         else:
             self.Gsq = list(itertools.product(mcG,repeat=2))
-            for p,q in self.Gsq: #parallelize this here or try to find an estimate
+            for p,q in self.Gsq:
                 if p != q:
                     for idx, atom in enumerate(self.list_atoms):
                         I = self.PP_NL_params[atom]
@@ -152,17 +129,14 @@ class error_X2n_X:
         return integral
     
     #PP specific
-    def k_loc(self, G_norm, I, *args, **kwargs):
+    def k_loc(self, G_norm, I, *args, **kwargs): #called gamma in the paper
         return 0
-    def k_locminmax(self):
-        self.k_locmin_val = 0
-        self.k_locmax_log = 0
     def k_NL(self, G_p, G_q, I, *args, **kwargs):
         return 0
     def k_NL_fast(self, Gsq, *args, **kwargs):
         return 0
     def compute_n_NL(self, error_NL):
-            pass
+        pass
 
 
 
@@ -178,7 +152,6 @@ class error_X2n_X_HGH(error_X2n_X):
             rs, Bi_inv = I['rs'], I['Bi_inv']
             atom_n_NL_error += rs[0]**3 * abs(Bi_inv[0]) * multipliers[0][atom]
             atom_n_NL_error += 32/3 * rs[1]**5 * abs(Bi_inv[1]) * sum(multipliers[1][atom])
-            # atom_n_NL_error += 3 * 64/45 * rs[2]**7 * abs(Bi_inv[2]) * multipliers[2][atom]
             atom_n_NL_error += 64/45 * rs[2]**7 * abs(Bi_inv[2]) * multipliers[2][atom]
             atom_n_NL_error += 64/15 * rs[2]**7 * abs(Bi_inv[2]) * sum(multipliers[3][atom])
             atom_n_NL_error *= self.atoms_rep[idx]
@@ -190,36 +163,13 @@ class error_X2n_X_HGH(error_X2n_X):
     def compute_n_k(self, error_k, lambda_NL_prime):
         return self.error2n(2*(self.n_Ltype+4)*np.pi*sum(lambda_NL_prime)/error_k)
 
-    def k_loc(self, G_norm, I): #I contains Z_ion, r_loc, Cs
+    def k_loc(self, G_norm, I): #I contains Z_ion, r_loc, Cs, this is function gamma in the paper
         Z_ion, r_loc, Cs = I['Z_ion'], I['r_loc'], I['Cs']
         D1 = (Cs[0]+3*Cs[1])*np.sqrt(np.pi)*r_loc**3/2
         D2 = Cs[1]*np.sqrt(np.pi)*r_loc**5/2
         return np.exp(-(G_norm*r_loc)**2/2)*(-Z_ion + (D1-D2*G_norm**2)*G_norm**2)
             
     
-    #it's actually k_loc_inv_min, since the minimum is obviously very close to zero
-    def k_locminmax(self):
-
-        def compute_min(n_a, Z_ion, r_loc, D1,D2):
-            x = Ps(n_a,self.b_r)/n_a *\
-                np.abs(self.G_nunormsexps**(r_loc**2/2)/(-Z_ion + (D1-D2*self.G_pnorms**2)*self.G_pnorms**2))
-            minx = np.min(x)
-            return minx, 1/minx #argmin 1/|k_I| = argmax  |k_I|
-            
-        mins = []
-        maxs = []
-        for idx, atom in enumerate(self.list_atoms):
-            I = self.PP_loc_params[atom]
-            Z_ion, r_loc, Cs = I['Z_ion'], I['r_loc'], I['Cs']
-            D1 = (Cs[0]+3*Cs[1])*np.sqrt(np.pi)*r_loc**3/2
-            D2 = Cs[1]*np.sqrt(np.pi)*r_loc**5/2
-            n_a = self.atoms_rep[idx]
-            minval, maxval = compute_min(n_a, Z_ion, r_loc, D1, D2)
-            mins.append(minval)
-            maxs.append(maxval)
-        self.k_locmin_val =  np.min(mins)**(1/2) * Ps(self.natoms_type, self.b_r)**(-1/2)
-        self.k_locmax_log = np.ceil(np.log2(np.max(maxs)))
-        
     def k_NL(self, G_p, G_q, I): #I contains r0, r1, r2, B0_inv, B1_inv, B2_inv
         rs, Bi_inv = I['rs'], I['Bi_inv']
         nGp, nGq = norm(G_p), norm(G_q)

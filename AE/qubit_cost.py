@@ -9,8 +9,5 @@ def qubit_cost(n_p,n_M,n_R,n_T,beta, lambda_val, error_qpe,eta, lambda_zeta, n_B
     clean_temp_H_cost = max([5*n_R-4,5*n_p+1]) + clean_prep_temp_cost
     clean_temp_cost = max([clean_temp_H_cost, np.ceil(np.log2(eta+2*lambda_zeta)) + 2*np.ceil(np.log2(eta))+ 6*n_p+n_M+16+3+2])
     logical_clean_qubits = sum(clean_cost) + clean_temp_cost 
-
     logical_qubits = max([logical_clean_qubits,beta*(n_M+1)])
-    print('clean logicals ', logical_clean_qubits)
-    print('dirties from beta ',beta*(n_M+1))
-    return logical_qubits
+    return logical_qubits, logical_clean_qubits, beta*(n_M+1)

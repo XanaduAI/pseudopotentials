@@ -1,3 +1,8 @@
+#############################################################################
+#An adaptation of [T-Fermion](https://github.com/PabloAMC/TFermion) to materials with nonorthogonal lattice
+#Notations and equations follow the accompanying paper and [Su. et. al.](https://arxiv.org/pdf/2105.12767.pdf)
+#############################################################################
+
 from utils import *
 import numpy as np
 
