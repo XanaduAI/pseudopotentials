@@ -1,12 +1,12 @@
 import numpy as np
 
-def build_Configs(order = 3, material_idx = 0, n_tof = 500, error=1.5e-3, pnuth=0.75):
+def build_Configs(N = 1e3, mat_idx = 0, error=1.5e-3, n_tof = 500, p_th = 0.75):
     error = error #corresponding to 0.043 eV
     b_r = 8 #number of qubits used in the uniform superposition preparations, 8 is enough (very high probability of success)
-    pnuth = pnuth #success threshold for amplitude amplification in loc and V
-    orderofmag = order #N = 10**orderofmag
+    pnuth = p_th #success threshold for amplitude amplification in loc and V
+    orderofmag = np.rint(np.log10(N)) #N = 10**orderofmag
     material_name = ['dis','limnfo','limnnio','limno']  #dis: Li2FeSiO4, limnfo: Li0.5MnO2F, limnnio: Li0.75[Li0.17Mn0.58Ni0.25]O2, limno: Li0.5MnO3
-    material_choice = material_name[material_idx]
+    material_choice = material_name[mat_idx]
 
     #baseparams
     #first component is the number of PW
@@ -38,7 +38,7 @@ def build_Configs(order = 3, material_idx = 0, n_tof = 500, error=1.5e-3, pnuth=
     'Fe': {'Z_ion': 8, 'rs': [0.454482, 0.638903, 0.308732], 'Bi_inv': [3.016640, 1.499642, -9.145354]}},
     }
 
-    Li_rich_manganese_oxifluoride = { #Li0.5MnO2F
+    Li_rich_manganese_oxyfluoride = { #Li0.5MnO2F
     'eta' : 428,
     'atoms_and_rep_uc' : {'Li': 12, 'Mn': 16, 'F': 16, 'O': 32}, 
     'direct_basis_vectors': [[12.48,0,0],[0,8.32,0],[0,0,8.32]],
@@ -86,7 +86,7 @@ def build_Configs(order = 3, material_idx = 0, n_tof = 500, error=1.5e-3, pnuth=
     'O': {'Z_ion': 6, 'rs': [0.221786, 0.256829, 0.], 'Bi_inv': [18.266917, 0., 0.]}}
     }
 
-    material_specs = {'dis':dilithium_iron_silicate, 'limnfo': Li_rich_manganese_oxifluoride,
+    material_specs = {'dis':dilithium_iron_silicate, 'limnfo': Li_rich_manganese_oxyfluoride,
                     'limnnio':LLNMO, 'limno':Li_rich_manganese_oxide}
 
     opt_error = True 

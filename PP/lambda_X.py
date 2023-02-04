@@ -1,6 +1,5 @@
 import numpy as np
 import itertools
-
 from utils import Ps
 from error_X2n_X import error_X2n_X, error_X2n_X_HGH
 norm = np.linalg.norm

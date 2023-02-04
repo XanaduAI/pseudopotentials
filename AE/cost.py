@@ -14,9 +14,9 @@ from qubit_cost import *
 from gate_cost import *
 norm = np.linalg.norm
 
-def first_quantization_qubitization(N : float, material_idx = 0 , pth = 0.95, n_parallel = 500):
+def first_quantization_qubitization(N : float, mat_idx = 0 , error = 1.5e-3, n_tof = 500, p_th = 0.95):
 
-    material = ['dis', 'limnfo', 'limnnio', 'limno'][material_idx]
+    material = ['dis', 'limnfo', 'limnnio', 'limno'][mat_idx]
     
     if material == 'dis':
         mspecs = {'vec_a': np.array([[5.02,0,0],[0,5.40,0],[0,0,6.26]]),
@@ -54,7 +54,7 @@ def first_quantization_qubitization(N : float, material_idx = 0 , pth = 0.95, n_
     
     #error_params
     n_errors_opt = 4
-    error= 1.5e-3
+    error= error
     qpe_error_opt = 0.1
     e_opt = np.sqrt(error**2-error**2/(1+qpe_error_opt**2))/n_errors_opt
 
@@ -97,7 +97,7 @@ def first_quantization_qubitization(N : float, material_idx = 0 , pth = 0.95, n_
                 B_mus[mu].append(nu)
 
     n_p, n_eta, n_eta_zeta, n_M, n_R, n_T, n_B, lambda_value, a_U = calculate_number_bits_parameters(optimized_parameters, N, n_p, eta, lambda_zeta, Omega, 
-    recip_bv, B_mus, bmin, pth, epsilon_B, material_ortho_lattice)
+    recip_bv, B_mus, bmin, p_th, epsilon_B, material_ortho_lattice)
 
     #number of QPE runs (overlap with g.s. not included)
     r = np.ceil(np.pi*lambda_value/(2*epsilon_PEA))
@@ -105,7 +105,7 @@ def first_quantization_qubitization(N : float, material_idx = 0 , pth = 0.95, n_
     epsilon_S_HF = 1e-2 #This parameter indicates the decrease in overlap with ground state due to imperfect rotations.
     epsilon_SS_HF = epsilon_S_HF / (2*eta*(N_small-eta))
     QPE_cost, beta, Prep, Sel = calculate_QPE_cost(n_p, n_eta, n_eta_zeta, n_M, n_R, n_T, lambda_value, r, br, eta, lambda_zeta, 
-weight_toffoli_cost, epsilon_S, n_B, a_U, n_p2cost, n_parallel, material)
+weight_toffoli_cost, epsilon_S, n_B, a_U, n_p2cost, n_tof, material)
     HF_cost = calculate_HF_cost(epsilon_SS_HF, n_p, eta, N_small, weight_toffoli_cost, N)
     print('lambda ', lambda_value)
     # print('initial state Toffoli cost', "{:.2e}".format(Decimal(HF_cost)))
