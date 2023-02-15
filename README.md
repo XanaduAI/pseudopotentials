@@ -1,8 +1,3 @@
-<div align="center">     
- [![Paper](http://img.shields.io/badge/arxiv-quant.ph:2110.05899-B31B1B.svg)](https://arxiv.org/abs/X)
- <!-- ![Paper](http://img.shields.io/badge/2022-Quantum-purple.svg)](https://quantum-journal.org/papers/q-2022-07-20-768/) -->
-</div>
-
 # Resource Estimation of Qubitization-based QPE
 
 ## How to install  
@@ -56,24 +51,10 @@ Qubit cost 2847.0 clean 2620.0
 The parameters used to obtain the results in the accompanying paper are given in `params.md`. Some small discrepancies with what is in the paper may occur due to future updates of the code.
 
 ## Authorship
-### Citation
-<!-- ```
-@article{casares2022tfermion,
-  doi = {10.22331/q-2022-07-20-768},
-  url = {https://doi.org/10.22331/q-2022-07-20-768},
-  title = {{TF}ermion: {A} non-{C}lifford gate cost assessment library of quantum phase estimation algorithms for quantum chemistry},
-  author = {Casares, Pablo A. M. and Campos, Roberto and Martin-Delgado, M. A.},
-  journal = {{Quantum}},
-  issn = {2521-327X},
-  publisher = {{Verein zur F{\"{o}}rderung des Open Access Publizierens in den Quantenwissenschaften}},
-  volume = {6},
-  pages = {768},
-  month = jul,
-  year = {2022}
-}
-```    -->
+<!-- ### Citation -->
 ### Contributors  
-<!-- [Modjtaba Shokrian Zini](https://github.com/mojishoki) (Xanadu Quantum Technologies Inc.).
-Xanadu Quantum Technologies Inc. -->
+If you are doing research using this code, please cite our paper below:
+> Modjtaba Shokrian Zini, Alain Delgado, Roberto dos Reis, Pablo A. M. Casares, Jonathan E. Mueller, Arne-Christian Voigt, Juan Miguel Arrazola,
+> Quantum simulation of battery materials using ionic pseudopotentials
 ### License
-<!-- Apache 2.0 license. -->
+This code is **free** and **open source**, and released under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
