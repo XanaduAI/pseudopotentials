@@ -55,6 +55,6 @@ The parameters used to obtain the results in the accompanying paper are given in
 ### Contributors  
 If you are doing research using this code, please cite our paper below:
 > Modjtaba Shokrian Zini, Alain Delgado, Roberto dos Reis, Pablo A. M. Casares, Jonathan E. Mueller, Arne-Christian Voigt, Juan Miguel Arrazola,
-> Quantum simulation of battery materials using ionic pseudopotentials
+> Quantum simulation of battery materials using ionic pseudopotentials, arxiv:2302.07981
 ### License
 This code is **free** and **open source**, and released under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
