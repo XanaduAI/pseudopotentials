@@ -51,10 +51,9 @@ Qubit cost 2847.0 clean 2620.0
 The parameters used to obtain the results in the accompanying paper are given in `params.md`. Some small discrepancies with what is in the paper may occur due to future updates of the code.
 
 ## Authorship
-<!-- ### Citation -->
-### Contributors  
+### Citation
 If you are doing research using this code, please cite our paper below:
 > Modjtaba Shokrian Zini, Alain Delgado, Roberto dos Reis, Pablo A. M. Casares, Jonathan E. Mueller, Arne-Christian Voigt, Juan Miguel Arrazola,
-> Quantum simulation of battery materials using ionic pseudopotentials
+> Quantum simulation of battery materials using ionic pseudopotentials, arXiv:2302.07981 (2023)
 ### License
 This code is **free** and **open source**, and released under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
