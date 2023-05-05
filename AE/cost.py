@@ -13,9 +13,8 @@ from init_state import *
 from qubit_cost import *
 from gate_cost import *
 norm = np.linalg.norm
-
-def first_quantization_qubitization(N : float, mat_idx = 0 , error = 1.5e-3, n_tof = 500, p_th = 0.95):
-
+    
+def first_quantization_qubitization(N = 1e3, mat_idx = 0 , error = 1.5e-3, n_tof = 500, p_th = 0.92):
     material = ['dis', 'limnfo', 'limnnio', 'limno'][mat_idx]
     
     if material == 'dis':

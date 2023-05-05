@@ -30,9 +30,9 @@ def calculate_lambdas(N, eta, lambda_zeta, Omega, n_p, M, bmin, B_mus, recip_bv,
           abs_sum += np.abs(np.sum(b_omega*b_omega_prime))
 
     if material_ortho_lattice:
-      lambda_prime_T = abs_sum*eta* 2**(2*n_p-2) /(4*(1-4*np.pi/2**(n_B)))
+      lambda_prime_T = abs_sum*eta* 2**(2*n_p-2) /(4)
     else:
-      lambda_prime_T = abs_sum*eta* 2**(2*n_p-2) /(2*(1-4*np.pi/2**(n_B)))
+      lambda_prime_T = abs_sum*eta* 2**(2*n_p-2) /(2)
     eps = 4/(M*bmin**2) *(7*2**(n_p+1) + 9*n_p -11 -3*2**(-n_p))
     lambda_nu = compute_lambda_nu(n_p,M, bmin, B_mus, recip_bv, lambda_nu_orthonormal)
     if n_p<= 6: 
@@ -54,16 +54,13 @@ def calculate_number_bits_parameters(optimized_parameters, N, n_p, eta, lambda_z
     # n_eta_zeta
     n_eta_zeta = np.ceil(np.log2(eta+2*lambda_zeta))
     # n_M
-    n_M = np.ceil(np.log2( (8*np.pi*eta)*(eta-1+2*lambda_zeta)*(7*2**(n_p+1)-9*n_p+11-3*2**(-n_p))/(epsilon_M* bmin**2)))
+    n_M = np.ceil(np.log2( (8*np.pi*eta)*(eta-1+2*lambda_zeta)*(7*2**(n_p+1)-9*n_p-11-3*2**(-n_p))/(epsilon_M* Omega * bmin**2)))
     M  = 2**n_M
     # n_R
     n_R = np.ceil(np.log2( eta*lambda_zeta/(epsilon_R*Omega**(1/3))*sum_1_over_nu(N)))
     # n_B
     def compute_n_b(error_b):
-      abs_sum = 0 
-      for b_omega in recip_bv:
-          for b_omega_prime in recip_bv:
-              abs_sum += np.abs(np.sum(b_omega*b_omega_prime))
+      abs_sum = sum([np.abs(np.sum(b1*b2)) for b1,b2 in itertools.product(recip_bv, repeat=2)])
       scalar = 2*np.pi*eta*2**(2*n_p-2)*abs_sum/error_b
       return np.ceil(np.log2(scalar))
     n_B = compute_n_b(epsilon_B)

@@ -56,7 +56,7 @@ weight_toffoli_cost, epsilon_S, n_B, a_U, n_p2cost, n_parallel,material):
     def momentum_state_QROM(n_p, n_M, n_dirty, n_parallel, kappa):
         nqrom_bits = 3*n_p
         x = 2**nqrom_bits
-        y = n_M+1 #one bit more due to binary decimal needed to compare to integer m
+        y = n_M #one bit more due to binary decimal needed to compare to integer m
         
         beta_dirty = np.floor(n_dirty/y)
         beta_parallel = np.floor(n_parallel/kappa)
@@ -77,7 +77,7 @@ weight_toffoli_cost, epsilon_S, n_B, a_U, n_p2cost, n_parallel,material):
         else:
             momentum_state_cost_qrom = 2*np.ceil(x/beta) + 3*np.ceil(y/kappa)*np.ceil(np.log2(beta))
             
-        momentum_state_cost = 2*momentum_state_cost_qrom + y + 8*(n_p-1) + 6*n_p+2
+        momentum_state_cost = 2*momentum_state_cost_qrom + y + 8*(n_p-1) + 6*n_p+2 + 2*n_p+n_M+2
         return momentum_state_cost, beta
     
     n_dirty = n_p2cost[n_p]
@@ -112,7 +112,7 @@ weight_toffoli_cost, epsilon_S, n_B, a_U, n_p2cost, n_parallel,material):
     # Total cost of Select
     Sel = cswap_p_q + Sel_T + controlled_sum_substraction_nu + U_phase
     # Rotation in definition of Q
-    Rot = n_eta_zeta + 2*n_eta + 6*n_p + n_M + 16 + 3 + 2 #3 is because 5-2=3, where 2 was already in the calculation of 16 for sup_w, and additional 2 for the n_AA
+    Rot = n_eta_zeta + 2*n_eta + 6*n_p + n_M + 16 + 3 #3 is because 5-2=3, where 2 was already in the calculation of 16 for sup_w
 
     # Final toffoli cost
     QPE_toffoli_cost = r*(Prep + Sel + Rot)

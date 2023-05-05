@@ -59,8 +59,8 @@ class error_X2n_X:
         return self.error2n(scalar*integral)
         
     def compute_n_M_V(self, error_M_V): #n_M_V
-        scalar = 8*np.pi*self.eta*(self.eta-1)/(self.Omega**self.bmin**2)
-        integral = (7*2**(self.n_p+1)-9*self.n_p+11-3*2**(-self.n_p))/error_M_V
+        scalar = 8*np.pi*self.eta*(self.eta-1)/(self.Omega* self.bmin**2)
+        integral = (7*2**(self.n_p+1)-9*self.n_p-11-3*2**(-self.n_p))/error_M_V
         return self.error2n(scalar*integral)
     
     
